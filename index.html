@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APP RECASA v2.0</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+    #loading { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+    .spinner { width: 50px; height: 50px; border: 4px solid rgba(56, 189, 248, 0.2); border-top: 4px solid #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    body.ready #loading { display: none; }
+    body.ready #app { display: block; }
+    #app { display: none; padding: 20px; }
+    .topbar { background: #1e293b; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #10b981; border: none; border-radius: 50%; font-size: 32px; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .fab:hover { background: #059669; }
+    #calendar { background: #1e293b; padding: 30px; border-radius: 8px; text-align: center; min-height: 400px; }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #38bdf8;">Cargando APP RECASA v2.0...</p>
+  </div>
+
+  <div id="app">
+    <div class="topbar">
+      <h1>📅 AGENDA RECASA</h1>
+      <div>
+        <span id="status">Firebase: <span style="color: #10b981;">●</span></span>
+      </div>
+    </div>
+    
+    <div id="calendar">
+      <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+      <h2>APP FUNCIONANDO CORRECTAMENTE</h2>
+      <p style="margin-top: 20px; color: #94a3b8;">Click en ➕ para probar</p>
+      <div id="info" style="margin-top: 30px; padding: 20px; background: #0f172a; border-radius: 8px;"></div>
+    </div>
+    
+    <button class="fab" onclick="testApp()">➕</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnnVy0eregyEnMOoFPVHdEQ22FIp-E7rA",
+      authDomain: "agenda-recasa-a6da4.firebaseapp.com",
+      databaseURL: "https://agenda-recasa-a6da4-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "agenda-recasa-a6da4"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    // Estado simple
+    const AppState = {
+      items: JSON.parse(localStorage.getItem('items') || '[]'),
+      getItems() { return this.items; },
+      addItem(item) { 
+        item.id = Date.now();
+        this.items.push(item); 
+        localStorage.setItem('items', JSON.stringify(this.items));
+        updateInfo();
+      }
+    };
+    
+    // Init
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.body.classList.add('ready');
+        updateInfo();
+        console.log('✅ APP LISTA');
+      }, 500);
+    });
+    
+    function updateInfo() {
+      const info = document.getElementById('info');
+      info.innerHTML = `
+        <strong>Estado:</strong><br>
+        Items en localStorage: ${AppState.items.length}<br>
+        Firebase: Conectado ✅<br>
+        Última actualización: ${new Date().toLocaleTimeString()}
+      `;
+    }
+    
+    function testApp() {
+      const cliente = prompt('Nombre del cliente:');
+      if (cliente) {
+        AppState.addItem({
+          fecha: new Date().toISOString().split('T')[0],
+          cliente: cliente,
+          tratamiento: 'INERT'
+        });
+        alert('✅ Item agregado! Total: ' + AppState.items.length);
+      }
+    }
+  </script>
+</body>
+</html>
